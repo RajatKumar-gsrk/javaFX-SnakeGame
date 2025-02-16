@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "SnakeGame",
+            "request": "launch",
+            "vmArgs": "--module-path \"C:/Users/Rajat Kumar/Desktop/Coding/Java/javaFX/SnakeGame/lib/javafx-sdk-23.0.2/lib\" --add-modules javafx.controls,javafx.fxml,javafx.web",
+            "mainClass": "main.SnakeGame",
+            "cwd": "${workspaceFolder}",
+            "projectName": "SnakeGame_58f3897e"
+        },
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "vmArgs": "--module-path \"C:/Users/Rajat Kumar/Desktop/Coding/Java/javaFX/SnakeGame/lib/javafx-sdk-23.0.2/lib\" --add-modules javafx.controls,javafx.fxml,javafx.web",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "SnakeGame",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "vmArgs": "--module-path \"C:/Users/Rajat Kumar/Desktop/Coding/Java/javaFX/SnakeGame/lib/javafx-sdk-23.0.2/lib\" --add-modules javafx.controls,javafx.fxml,javafx.web",
+            "mainClass": "SnakeGame",
+            "projectName": "SnakeGame_58f3897e"
+        }
+    ]
+}
