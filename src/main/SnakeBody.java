@@ -13,9 +13,13 @@ public class SnakeBody {
     private int previous_direction = constants.RIGHT;
 
     public SnakeBody(int type, int x, int y){//java doesn;t have default parameters
-        this.type = type;
-        this.posX = x*constants.SQUARE_SIZE;
-        this.posY = y*constants.SQUARE_SIZE;
+        setType(type);
+        setPos(x, y);
+    }
+
+    public void setPos(int x, int y){
+        setX(x);
+        setY(y);
     }
 
     public void setType(int type){
@@ -31,7 +35,7 @@ public class SnakeBody {
     }
 
     public int getX(){
-        return this.posX;
+        return this.posX/constants.SQUARE_SIZE;
     }
 
     public void setY(int y){
@@ -39,7 +43,7 @@ public class SnakeBody {
     }
 
     public int getY(){
-        return this.posY;
+        return this.posY/constants.SQUARE_SIZE;
     }
 
     private void setPevious_direction(int direction){
