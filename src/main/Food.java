@@ -20,7 +20,15 @@ public class Food {
         this.item = new Image(getClass().getResourceAsStream(imagePaths[new Random().nextInt(imagePaths.length)]));
     }
 
+    public int getX(){
+        return this.posX/constants.SQUARE_SIZE;
+    }
+
+    public int getY(){
+        return this.posY/constants.SQUARE_SIZE;
+    }
+
     public void drawFoodItem(GraphicsContext penGC){
-        penGC.drawImage(item, posY, posX, constants.SQUARE_SIZE, constants.SQUARE_SIZE);
+        penGC.drawImage(item, posX, posY, constants.SQUARE_SIZE, constants.SQUARE_SIZE);
     }
 }

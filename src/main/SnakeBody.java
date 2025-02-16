@@ -94,7 +94,7 @@ public class SnakeBody {
             penGC.drawImage(new Image("resources/snake/body_up.png"), posX, posY, constants.SQUARE_SIZE, constants.SQUARE_SIZE);
         }else if(current_direction == constants.UP && previous_direction == constants.RIGHT){
             penGC.drawImage(new Image("resources/snake/body_right_up.png"), posX, posY, constants.SQUARE_SIZE, constants.SQUARE_SIZE);
-        }else if(current_direction == constants.UP && previous_direction == constants.UP){
+        }else if(current_direction == constants.UP && previous_direction == constants.LEFT){
             penGC.drawImage(new Image("resources/snake/body_left_up.png"), posX, posY, constants.SQUARE_SIZE, constants.SQUARE_SIZE);
         }else if(current_direction == constants.DOWN && previous_direction == constants.RIGHT){
             penGC.drawImage(new Image("resources/snake/body_right_down.png"), posX, posY, constants.SQUARE_SIZE, constants.SQUARE_SIZE);

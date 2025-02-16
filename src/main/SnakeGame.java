@@ -2,7 +2,9 @@ package main;
 import main.constants;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import javafx.util.Duration;//make sure to import proper libraries
 import javafx.animation.Animation;
@@ -17,11 +19,12 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class SnakeGame extends Application{
     
-    
+    private int score = 0;
 
     private Boolean gameOver = false;
     private List<SnakeBody> snake = new ArrayList<>();
@@ -33,7 +36,7 @@ public class SnakeGame extends Application{
     public void start(Stage mainWindow){
         
         Group root = new Group();//groups together components 
-        Canvas mainCanvas = new Canvas(constants.WIDTH, constants.HEIGHT);
+        Canvas mainCanvas = new Canvas(constants.WIDTH + 200, constants.HEIGHT);
         penGC = mainCanvas.getGraphicsContext2D();//setting brush for main canvas
         root.getChildren().add(mainCanvas);
 
@@ -49,46 +52,134 @@ public class SnakeGame extends Application{
                 KeyCode code = e.getCode();
                 if(code == KeyCode.RIGHT || code == KeyCode.D){
                     if(snake.get(0).getCurrent_direction() != constants.LEFT){
-                        snake.get(0).setDirections(constants.RIGHT, snake.get(0).getCurrent_direction());
+                        snake.get(0).setDirections(constants.RIGHT, constants.RIGHT);
                     }
                 }else if(code == KeyCode.LEFT || code == KeyCode.A){
                     if(snake.get(0).getCurrent_direction() != constants.RIGHT){
-                        snake.get(0).setDirections(constants.LEFT, snake.get(0).getCurrent_direction());
+                        snake.get(0).setDirections(constants.LEFT, constants.LEFT);
                     }
                 }else if(code == KeyCode.DOWN || code == KeyCode.S){
                     if(snake.get(0).getCurrent_direction() != constants.UP){
-                        snake.get(0).setDirections(constants.DOWN, snake.get(0).getCurrent_direction());
+                        snake.get(0).setDirections(constants.DOWN, constants.DOWN);
                     }
                 }else if(code == KeyCode.UP || code == KeyCode.W){
                     if(snake.get(0).getCurrent_direction() != constants.DOWN){
-                        snake.get(0).setDirections(constants.UP, snake.get(0).getCurrent_direction());
+                        snake.get(0).setDirections(constants.UP, constants.UP);
                     }
+                }else if(code == KeyCode.SPACE){
+                    gameOver = !gameOver;
                 }
             }
         });
 
-        createSnake();
 
-        Timeline mainTimeline = new Timeline(new KeyFrame(Duration.millis(130), e->run()));//animates
+        createSnake();
+        generateFood();
+
+        Timeline poisonTimeline = new Timeline(new KeyFrame(Duration.millis(15000), e->generatePoison()));
+        poisonTimeline.setCycleCount(Animation.INDEFINITE);
+        poisonTimeline.play();
+
+        Timeline mainTimeline = new Timeline(new KeyFrame(Duration.millis(150), e->run()));//animates
         mainTimeline.setCycleCount(Animation.INDEFINITE);
         mainTimeline.play();
 
+    }
+
+    private void generateFood(){
+        begin:
+        while(true){
+            Random rand = new Random();
+            int x = rand.nextInt(constants.COLS), y = rand.nextInt(constants.ROWS);
+            
+            if(food_items.size() > 10){
+                int i = rand.nextInt(poison_items.size());
+                food_items.remove(i);
+            }
+
+            for(SnakeBody sb: snake){
+                if(x == sb.getX() && y == sb.getY()){
+                    continue begin;
+                }
+            }
+
+            for(Poisons p: poison_items){
+                if(x == p.getX() && y == p.getY()){
+                    continue begin;
+                }
+            }
+
+            for(Food f: food_items){
+                if(x == f.getX() && y == f.getY()){
+                    continue begin;
+                }
+            }
+
+            food_items.add(new Food(x, y));
+            return;
+        }
+    }
+
+    private void generatePoison(){
+        
+        begin:
+        while(true){
+            Random rand = new Random();
+            int x = rand.nextInt(constants.COLS), y = rand.nextInt(constants.ROWS);
+            
+            if(poison_items.size() > 4){
+                int i = rand.nextInt(poison_items.size());
+                poison_items.remove(i);
+            }
+
+            for(SnakeBody sb: snake){
+                if(x == sb.getX() && y == sb.getY()){
+                    continue begin;
+                }
+            }
+
+            for(Poisons p: poison_items){
+                if(x == p.getX() && y == p.getY()){
+                    continue begin;
+                }
+            }
+
+            for(Food f: food_items){
+                if(x == f.getX() && y == f.getY()){
+                    continue begin;
+                }
+            }
+
+            poison_items.add(new Poisons(x, y));
+            return;
+        }
     }
 
 
     private void run(){
         if(!gameOver){
             drawBackground();
-            drawSnake();
+            moveSnake();
             drawFoodItems();
             drawPoisonItems();
-
-            moveSnake();
+            drawSnake();
+            eatFood();
+            eatPoison();
+            drawScore();
+            //drawPoisonItems();
+        }else{
+            penGC.setFill(Color.web("#eb4034"));
+            penGC.setFont(new Font(90));
+            penGC.fillText("GAME OVER", constants.WIDTH/12, constants.HEIGHT/2);
         }
     }
 
 
     private void drawBackground(){//draws background
+
+        penGC.setFill(Color.web("#5976b5"));
+        penGC.fillRect(0, 0, constants.WIDTH + 200, constants.HEIGHT);
+
         for(int row = 0; row < constants.ROWS; row += 1){
             for(int col = 0; col < constants.COLS; col += 1){
                 if((row + col) % 2 == 0){
@@ -108,48 +199,90 @@ public class SnakeGame extends Application{
 
         SnakeBody mid = new SnakeBody(constants.BODY, 4, 4);
         snake.add(mid);
+        mid = new SnakeBody(constants.BODY, 3, 4);
+        snake.add(mid);
+        mid = new SnakeBody(constants.BODY, 2, 4);
+        snake.add(mid);
 
-        SnakeBody tail = new SnakeBody(constants.TAIL, 3, 4);
+        SnakeBody tail = new SnakeBody(constants.TAIL, 1, 4);
         snake.add(tail);
     }
 
     private void drawSnake(){
-        for(SnakeBody sb : snake){
-            sb.drawPart(penGC);
-        } 
+        for(int i = snake.size() - 1; i >= 0; i -= 1){
+            snake.get(i).drawPart(penGC);
+        }
     }
 
     private void drawFoodItems(){
-        food_items.add(new Food(7, 8));
         for(Food fd: food_items){
             fd.drawFoodItem(penGC);
         }
     }
 
     private void drawPoisonItems(){
-        poison_items.add(new Poisons(9, 2));
         for(Poisons p: poison_items){
             p.drawPoisonItem(penGC);
         }
     }
 
-    private void moveSnake(){
-        for(int i = 1; i < snake.size(); i += 1){
-            snake.get(i).setDirections(snake.get(i-1).getPrevious_direction(), snake.get(i).getCurrent_direction());
+    private void moveSnake(){//make movement of body and correct orientation
+        //body position update
+        for(int i = snake.size() - 1; i > 0; i -= 1){
+            snake.get(i).setPos(snake.get(i-1).getX(), snake.get(i-1).getY());
+        }
+        //head position update
+        switch(snake.get(0).getCurrent_direction()){//head position update
+            case constants.UP: snake.get(0).setY(snake.get(0).getY() - 1); break;
+
+            case constants.DOWN: snake.get(0).setY(snake.get(0).getY() + 1); break;
+
+            case constants.LEFT: snake.get(0).setX(snake.get(0).getX() - 1); break;
+
+            case constants.RIGHT: snake.get(0).setX(snake.get(0).getX() + 1); break;
         }
 
-        for(int i = 0; i < snake.size(); i += 1){
-            switch(snake.get(i).getCurrent_direction()){
-                case constants.UP: snake.get(i).setY(snake.get(i).getY() - 1); break;
-    
-                case constants.RIGHT: snake.get(i).setX(snake.get(i).getX() + 1); break;
-    
-                case constants.DOWN: snake.get(i).setY(snake.get(i).getY() + 1); break;
-    
-                case constants.LEFT: snake.get(i).setX(snake.get(i).getX() - 1); break; 
+        for(int i = snake.size() - 2; i > 0; i -= 1){//body orientation update
+            int nextX = snake.get(i - 1).getX(), nextY = snake.get(i - 1).getY();
+            int prevX = snake.get(i + 1).getX(), prevY = snake.get(i + 1).getY();
+            int x = snake.get(i).getX(), y = snake.get(i).getY();
+
+            if(nextX > x){//right
+                if(prevX < x){
+                    snake.get(i).setDirections(constants.RIGHT, constants.RIGHT);
+                }else if(prevY < y){
+                    snake.get(i).setDirections(constants.RIGHT, constants.DOWN);
+                }else if(prevY > y){
+                    snake.get(i).setDirections(constants.RIGHT, constants.UP);
+                }
+            }else if(nextX < x){//left
+                if(prevX > x){
+                    snake.get(i).setDirections(constants.LEFT, constants.LEFT);
+                }else if(prevY < y){
+                    snake.get(i).setDirections(constants.LEFT, constants.DOWN);
+                }else if(prevY > y){
+                    snake.get(i).setDirections(constants.LEFT, constants.UP);
+                }
+            }else if(nextY > y){//down
+                if(prevX < x){
+                    snake.get(i).setDirections(constants.DOWN, constants.RIGHT);
+                }else if(prevY < y){
+                    snake.get(i).setDirections(constants.DOWN, constants.DOWN);
+                }else if(prevX > x){
+                    snake.get(i).setDirections(constants.DOWN, constants.LEFT);
+                }
+            }else if(nextY < y){//up
+                if(prevX < x){
+                    snake.get(i).setDirections(constants.UP, constants.RIGHT);
+                }else if(prevY > y){
+                    snake.get(i).setDirections(constants.UP, constants.UP);
+                }else if(prevX > x){
+                    snake.get(i).setDirections(constants.UP, constants.LEFT);
+                }
             }
         }
-
+        //tail orientation
+        snake.getLast().setDirections(snake.get(snake.size() - 2).getPrevious_direction(), snake.getLast().getPrevious_direction());
         checkGameOver();
     }
 
@@ -170,6 +303,58 @@ public class SnakeGame extends Application{
                 return;
             }
         }
+    }
+
+    private void eatFood(){
+        int x = snake.getFirst().getX(), y = snake.getFirst().getY();
+        Iterator<Food> food_iterator = food_items.iterator();//better use iterator as we need to remove while iterating
+        while(food_iterator.hasNext()){
+            Food f = food_iterator.next();
+            if(f.getX() == x && f.getY() == y){
+                food_iterator.remove();
+                score += 10;
+                snakeGrow();
+                generateFood();
+                break;
+            }
+        }
+    }
+
+    private void eatPoison(){
+        int x = snake.getFirst().getX(), y = snake.getFirst().getY();
+        Iterator<Poisons> poison_iterator = poison_items.iterator();//better use iterator as we need to remove while iterating
+        while(poison_iterator.hasNext()){
+            Poisons p = poison_iterator.next();
+            if(p.getX() == x && p.getY() == y){
+                gameOver = true;
+                break;
+            }
+        }
+    }
+
+    private void snakeGrow(){
+        SnakeBody tail = snake.getLast();
+        tail.setType(constants.BODY);
+
+        SnakeBody newTail;
+
+        switch(tail.getCurrent_direction()){
+            case constants.UP: newTail = new SnakeBody(constants.TAIL, tail.getX(), tail.getY() - 1); break;
+
+            case constants.DOWN: newTail = new SnakeBody(constants.TAIL, tail.getX(), tail.getY() + 1); break;
+
+            case constants.LEFT: newTail = new SnakeBody(constants.TAIL, tail.getX() + 1, tail.getY()); break;
+
+            default: newTail = new SnakeBody(constants.TAIL, tail.getX() - 1, tail.getY() - 1); break;
+        }
+
+        snake.add(newTail);
+    }
+
+    private void drawScore(){
+        penGC.setFill(Color.web("#ffffff"));
+            penGC.setFont(new Font(40));
+            penGC.fillText("Score: "+score, 9*(constants.WIDTH + 200)/12, 2*constants.HEIGHT/20);
     }
 
     public static void main(String[] args) throws Exception {
