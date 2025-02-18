@@ -1,6 +1,7 @@
 package main;
 import main.constants;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -18,8 +19,11 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 public class SnakeGame extends Application{
@@ -27,11 +31,13 @@ public class SnakeGame extends Application{
     private int score = 0;
 
     private Boolean gameOver = false;
+    private Boolean gameOverMusic = true;
     private List<SnakeBody> snake = new ArrayList<>();
     private List<Food> food_items = new ArrayList<>();
     private List<Poisons> poison_items = new ArrayList<>();
 
     private GraphicsContext penGC;//paintBrush used to draw content on canvas
+    private MediaPlayer player; //plays music
 
     public void start(Stage mainWindow){
         
@@ -80,7 +86,9 @@ public class SnakeGame extends Application{
         poisonTimeline.setCycleCount(Animation.INDEFINITE);
         poisonTimeline.play();
 
-        Timeline mainTimeline = new Timeline(new KeyFrame(Duration.millis(150), e->run()));//animates
+        PlayBackgroundMusic();
+
+        Timeline mainTimeline = new Timeline(new KeyFrame(Duration.millis(200), e->run()));//animates
         mainTimeline.setCycleCount(Animation.INDEFINITE);
         mainTimeline.play();
 
@@ -171,6 +179,9 @@ public class SnakeGame extends Application{
             penGC.setFill(Color.web("#eb4034"));
             penGC.setFont(new Font(90));
             penGC.fillText("GAME OVER", constants.WIDTH/12, constants.HEIGHT/2);
+            if(gameOverMusic){
+                PlayGameOverMusic();
+            }
         }
     }
 
@@ -315,6 +326,7 @@ public class SnakeGame extends Application{
                 score += 10;
                 snakeGrow();
                 generateFood();
+                eatMunchiesMusic();
                 break;
             }
         }
@@ -353,8 +365,35 @@ public class SnakeGame extends Application{
 
     private void drawScore(){
         penGC.setFill(Color.web("#ffffff"));
-            penGC.setFont(new Font(40));
-            penGC.fillText("Score: "+score, 9*(constants.WIDTH + 200)/12, 2*constants.HEIGHT/20);
+            penGC.setFont(Font.font("Lucida Sans Unicode", FontWeight.BOLD,30));
+            penGC.fillText("Score: "+score, 9*(constants.WIDTH + 200)/12+ 30, 2*constants.HEIGHT/20);
+    }
+
+    public void PlayBackgroundMusic(){
+        String backGround = "/resources/sfx/backGroundMusic.wav";
+        URL resource = getClass().getResource(backGround);//as needs to be in jar file/app so get link to file
+        Media music = new Media(resource.toString());
+        player= new MediaPlayer(music);
+        player.setCycleCount(MediaPlayer.INDEFINITE);//plays indefimitely
+        player.play();
+    }
+
+    public void PlayGameOverMusic(){
+        gameOverMusic = false;
+        String gameOverMusic = "/resources/sfx/gameOverMusic.wav";
+        URL resource = getClass().getResource(gameOverMusic);//as needs to be in jar file/app so get link to file
+        Media music = new Media(resource.toString());
+        player.stop();
+        player = new MediaPlayer(music);
+        player.play();
+    }
+
+    public void eatMunchiesMusic(){
+        String munchingMusic = "/resources/sfx/munchingMusic.wav";
+        URL resource = getClass().getResource(munchingMusic);//as needs to be in jar file/app so get link to file
+        Media music = new Media(resource.toString());
+        MediaPlayer p = new MediaPlayer(music);
+        p.play();
     }
 
     public static void main(String[] args) throws Exception {
